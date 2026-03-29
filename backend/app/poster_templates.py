@@ -26,23 +26,48 @@ def _img_for_template(product: Image.Image) -> Image.Image:
 
 # --- 1. Brutalist stack -----------------------------------------------------
 def template_brutalist(name: str, description: str, price: str, product: Image.Image) -> Image.Image:
-    img = Image.new("RGB", (POSTER_W, POSTER_H), "#FCEE21")
+    # Muted champagne linen + espresso type + bronze / antique gold accents
+    canvas = "#DCD3C7"
+    img = Image.new("RGB", (POSTER_W, POSTER_H), canvas)
     draw = ImageDraw.Draw(img)
     sq = _img_for_template(product).convert("RGB")
-    draw.rectangle((48, 64, POSTER_W - 48, 64 + 720), fill="#111111")
-    img.paste(sq, (48 + 32, 64 + 32))
-    draw.rectangle((0, POSTER_H - 280, POSTER_W, POSTER_H), fill="#111111")
-    font_title = load_font(72, bold=True)
-    font_body = load_font(32)
-    font_price = load_font(96, bold=True)
-    draw.text((56, POSTER_H - 260), name.upper(), font=font_title, fill="#FCEE21")
-    y = POSTER_H - 180
-    for line in wrap_text(description, font_body, POSTER_W - 120, draw)[:3]:
-        draw.text((56, y), line, font=font_body, fill="#CCCCCC")
-        y += 38
-    draw.text((POSTER_W - 56, POSTER_H - 120), price, font=font_price, fill="#FCEE21", anchor="rm")
-    draw.rectangle((POSTER_W - 220, 48, POSTER_W - 48, 120), fill="#FF0055", outline="#111111", width=6)
-    draw.text((POSTER_W - 134, 84), "NEW", font=load_font(36, bold=True), fill="#111111", anchor="mm")
+    frame_pad = 32
+    frame_top = 64
+    frame_bottom = frame_top + frame_pad + sq.height + frame_pad
+    draw.rectangle((48, frame_top, POSTER_W - 48, frame_bottom), fill="#141210")
+    img.paste(sq, (48 + frame_pad, frame_top + frame_pad))
+
+    # Product story on canvas (below image): large serif italic + mono kicker
+    desc_y = frame_bottom + 44
+    font_kicker = load_font(40, mono=True)
+    font_desc = load_font(56, serif=True, italic=True)
+    kicker_text = "// PRODUCT STORY"
+    kicker_x, kicker_y = 58, desc_y
+    draw.text((kicker_x, kicker_y), kicker_text, font=font_kicker, fill=(88, 72, 60))
+    kicker_bbox = draw.textbbox((kicker_x, kicker_y), kicker_text, font=font_kicker)
+    gap_below_kicker = 36
+    y = kicker_bbox[3] + gap_below_kicker
+    desc_color = (42, 36, 32)
+    line_height = 62
+    for line in wrap_text(description, font_desc, POSTER_W - 116, draw)[:5]:
+        draw.text((58, y), line, font=font_desc, fill=desc_color)
+        y += line_height
+
+    rule_y = y + 28
+    draw.rectangle((58, rule_y, POSTER_W - 58, rule_y + 3), fill="#2A2420")
+    draw.rectangle((58, rule_y + 8, POSTER_W - 220, rule_y + 14), fill="#8B6A4E")
+
+    bottom_y = POSTER_H - 272
+    draw.rectangle((0, bottom_y, POSTER_W, POSTER_H), fill="#12100E")
+    font_name = load_font(70, bold=True, italic=True)
+    draw.text((56, bottom_y + 32), name.upper(), font=font_name, fill="#D9CBB3")
+    font_price_label = load_font(22, mono=True)
+    draw.text((56, POSTER_H - 118), "PRICE", font=font_price_label, fill=(148, 136, 124))
+    font_price = load_font(78, bold=True, mono=True)
+    draw.text((POSTER_W - 56, POSTER_H - 108), price, font=font_price, fill="#C4A574", anchor="rm")
+
+    draw.rectangle((POSTER_W - 220, 48, POSTER_W - 48, 120), fill="#6E5844", outline="#2A2420", width=4)
+    draw.text((POSTER_W - 134, 84), "NEW", font=load_font(36, bold=True), fill="#EDE6DC", anchor="mm")
     return img
 
 
@@ -54,57 +79,78 @@ def template_swiss(name: str, description: str, price: str, product: Image.Image
     sq = _img_for_template(product).convert("RGB")
     img.paste(sq, (120, 140))
     draw.line((120, 920, POSTER_W - 80, 920), fill="#111111", width=4)
-    font_h = load_font(64, bold=True)
-    font_p = load_font(42, bold=True)
-    font_b = load_font(28)
-    draw.text((120, 960), name, font=font_h, fill="#111111")
-    y = 1050
-    for line in wrap_text(description, font_b, POSTER_W - 200, draw)[:4]:
-        draw.text((120, y), line, font=font_b, fill="#444444")
-        y += 36
-    draw.text((POSTER_W - 80, POSTER_H - 100), price, font=font_p, fill="#E63946", anchor="rm")
-    draw.text((120, 80), "COLLECTION", font=load_font(22), fill="#888888")
+    # Sans bold oblique headline + large serif-italic body + mono price (Swiss grid / editorial catalog)
+    font_h = load_font(68, bold=True, italic=True)
+    font_desc = load_font(42, serif=True, italic=True)
+    font_price = load_font(62, bold=True, mono=True)
+    name_x, name_y = 120, 960
+    draw.text((name_x, name_y), name, font=font_h, fill="#111111")
+    name_bbox = draw.textbbox((name_x, name_y), name, font=font_h)
+    gap_after_name = 36
+    y = name_bbox[3] + gap_after_name
+    desc_line = 50
+    for line in wrap_text(description, font_desc, POSTER_W - 200, draw)[:4]:
+        draw.text((120, y), line, font=font_desc, fill=(52, 48, 46))
+        y += desc_line
+    draw.text((POSTER_W - 80, POSTER_H - 96), price, font=font_price, fill="#E63946", anchor="rm")
+    draw.text((120, 80), "COLLECTION", font=load_font(24, mono=True), fill="#6B6B6B")
     return img
 
 
-# --- 3. Retro sunset --------------------------------------------------------
+# --- 3. Retro sunset (twilight / luxe dusk) --------------------------------
 def template_sunset(name: str, description: str, price: str, product: Image.Image) -> Image.Image:
+    # Classy vertical gradient: warm stone → deep aubergine ink
+    top_rgb = (218, 208, 198)
+    bottom_rgb = (48, 44, 58)
     base = Image.new("RGB", (POSTER_W, POSTER_H))
     px = base.load()
+    denom = max(POSTER_H - 1, 1)
     for y in range(POSTER_H):
-        t = y / POSTER_H
-        r = int(255 * (0.95 - t * 0.4))
-        g = int(120 + t * 80)
-        b = int(60 + t * 140)
+        t = y / denom
+        r = int(top_rgb[0] + (bottom_rgb[0] - top_rgb[0]) * t)
+        g = int(top_rgb[1] + (bottom_rgb[1] - top_rgb[1]) * t)
+        b = int(top_rgb[2] + (bottom_rgb[2] - top_rgb[2]) * t)
         for x in range(POSTER_W):
             px[x, y] = (r, g, b)
     img = base
     draw = ImageDraw.Draw(img)
-    # Sun
-    cy = int(POSTER_H * 0.42)
-    draw.ellipse((POSTER_W // 2 - 180, cy - 180, POSTER_W // 2 + 180, cy + 180), fill="#FF9F1C")
+    # Muted copper disc (sun)
+    cy = int(POSTER_H * 0.4)
+    draw.ellipse((POSTER_W // 2 - 170, cy - 170, POSTER_W // 2 + 170, cy + 170), fill=(176, 148, 118))
     sq = _img_for_template(product)
     sq = ImageOps.colorize(
         ImageOps.grayscale(sq),
-        black="#2B0F0A",
-        white="#FFF5E6",
+        black="#1E1A18",
+        white="#F4EDE4",
     ).convert("RGBA")
     rmask = rounded_rectangle_mask((sq.width, sq.height), 48)
     rounded = Image.new("RGBA", sq.size, (0, 0, 0, 0))
     rounded.paste(sq, (0, 0), rmask)
-    img.paste(rounded, (POSTER_W // 2 - sq.width // 2, 520), rounded)
-    font_t = load_font(68, bold=True)
-    font_b = load_font(30)
-    font_pr = load_font(56, bold=True)
-    shadow = (40, 40, 40)
+    img_y = 500
+    img.paste(rounded, (POSTER_W // 2 - sq.width // 2, img_y), rounded)
+    img_bottom = img_y + rounded.height
+    gap_image_to_desc = 96
+    font_t = load_font(78, bold=True, italic=True)
+    shadow = (32, 28, 38)
+    cx = POSTER_W // 2
+    title_y = 188
+    title_upper = name.upper()
     for dx, dy in [(-2, -2), (2, 2), (-2, 2), (2, -2)]:
-        draw.text((POSTER_W // 2 + dx, 200 + dy), name.upper(), font=font_t, fill=shadow, anchor="mm")
-    draw.text((POSTER_W // 2, 200), name.upper(), font=font_t, fill="#FFF8E7", anchor="mm")
-    y = 1320
-    for line in wrap_text(description, font_b, POSTER_W - 160, draw)[:3]:
-        draw.text((POSTER_W // 2, y), line, font=font_b, fill="#2D1B2E", anchor="mm")
-        y += 40
-    draw.text((POSTER_W // 2, POSTER_H - 140), price, font=font_pr, fill="#FF006E", anchor="mm")
+        draw.text((cx + dx, title_y + dy), title_upper, font=font_t, fill=shadow, anchor="mm")
+    draw.text((cx, title_y), title_upper, font=font_t, fill=(248, 242, 234), anchor="mm")
+    font_b = load_font(44, serif=True, italic=True)
+    font_kicker = load_font(26, mono=True)
+    desc_y = img_bottom + gap_image_to_desc
+    kicker = "— OVERVIEW —"
+    draw.text((cx, desc_y), kicker, font=font_kicker, fill=(190, 178, 168), anchor="mm")
+    kbb = draw.textbbox((cx, desc_y), kicker, font=font_kicker, anchor="mm")
+    y = kbb[3] + 30
+    desc_line = 54
+    for line in wrap_text(description, font_b, POSTER_W - 140, draw)[:4]:
+        draw.text((cx, y), line, font=font_b, fill=(232, 224, 216), anchor="mm")
+        y += desc_line
+    font_pr = load_font(74, bold=True, mono=True)
+    draw.text((cx, POSTER_H - 128), price, font=font_pr, fill=(212, 184, 148), anchor="mm")
     return img
 
 

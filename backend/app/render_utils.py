@@ -34,18 +34,39 @@ def normalize_uploaded_product(img: Image.Image) -> Image.Image:
 FONT_DIR = Path("/usr/share/fonts/truetype/dejavu")
 FONT_SANS = FONT_DIR / "DejaVuSans.ttf"
 FONT_SANS_BOLD = FONT_DIR / "DejaVuSans-Bold.ttf"
+FONT_SANS_OBLIQUE = FONT_DIR / "DejaVuSans-Oblique.ttf"
+FONT_SANS_BOLD_OBLIQUE = FONT_DIR / "DejaVuSans-BoldOblique.ttf"
 FONT_SERIF = FONT_DIR / "DejaVuSerif.ttf"
 FONT_SERIF_BOLD = FONT_DIR / "DejaVuSerif-Bold.ttf"
+FONT_SERIF_ITALIC = FONT_DIR / "DejaVuSerif-Italic.ttf"
+FONT_SERIF_BOLD_ITALIC = FONT_DIR / "DejaVuSerif-BoldItalic.ttf"
 FONT_MONO = FONT_DIR / "DejaVuSansMono-Bold.ttf"
+FONT_MONO_REG = FONT_DIR / "DejaVuSansMono.ttf"
 
 
-def load_font(size: int, bold: bool = False, serif: bool = False, mono: bool = False) -> ImageFont.FreeTypeFont:
-    if mono and FONT_MONO.exists():
-        return ImageFont.truetype(str(FONT_MONO), size)
+def load_font(
+    size: int,
+    bold: bool = False,
+    serif: bool = False,
+    mono: bool = False,
+    italic: bool = False,
+) -> ImageFont.FreeTypeFont:
+    if mono:
+        path = FONT_MONO if bold else (FONT_MONO_REG if FONT_MONO_REG.exists() else FONT_MONO)
+        if path.exists():
+            return ImageFont.truetype(str(path), size)
+    if serif and italic:
+        path = FONT_SERIF_BOLD_ITALIC if bold else FONT_SERIF_ITALIC
+        if path.exists():
+            return ImageFont.truetype(str(path), size)
     if serif:
         path = FONT_SERIF_BOLD if bold else FONT_SERIF
         if path.exists():
             return ImageFont.truetype(str(path), size)
+    if bold and italic and FONT_SANS_BOLD_OBLIQUE.exists():
+        return ImageFont.truetype(str(FONT_SANS_BOLD_OBLIQUE), size)
+    if italic and FONT_SANS_OBLIQUE.exists():
+        return ImageFont.truetype(str(FONT_SANS_OBLIQUE), size)
     path = FONT_SANS_BOLD if bold else FONT_SANS
     if path.exists():
         return ImageFont.truetype(str(path), size)

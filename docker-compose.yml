@@ -1,0 +1,20 @@
+services:
+  backend:
+    build: ./backend
+    container_name: poster-maker-backend
+    networks:
+      - poster-net
+
+  frontend:
+    build: ./frontend
+    container_name: poster-maker-frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - poster-net
+
+networks:
+  poster-net:
+    name: poster-maker-net

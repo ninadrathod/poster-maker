@@ -1,0 +1,35 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+html,
+body {
+  overflow: hidden;
+}
+
+#root {
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: "Outfit", system-ui, sans-serif;
+  background: #0b0b0c;
+  color: #e8e6e3;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
